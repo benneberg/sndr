@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sndr - secure file transfer</title>
+    <meta name="theme-color" content="#1E1E1E">
+     <link rel="manifest" href="./manifest.json" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --background-color: #121212;
+            --surface-color: #1E1E1E;
+            --primary-color: #00BCD4;
+            --primary-hover-color: #0097A7;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B0B0;
+            --border-color: #333333;
+        }
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+            'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+            sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+        }
+        #root {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            box-sizing: border-box;
+        }
+        .hidden { display: none !important; }
+
+        /* Component Styles from React converted to CSS */
+        .container {
+            background-color: var(--surface-color); padding: 2rem; border-radius: 16px; width: 100%;
+            max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border: 1px solid var(--border-color);
+            display: flex; flex-direction: column;
+        }
+        .header {
+            display: flex; align-items: center; justify-content: center; gap: 0.75rem; color: var(--primary-color);
+        }
+        .title { margin: 0; font-size: 1.75rem; font-weight: 600; color: var(--text-primary); }
+        .subtitle { margin: 0.25rem 0 1.5rem; text-align: center; color: var(--text-secondary); font-size: 0.9rem; }
+        .tabs {
+            display: flex; background-color: var(--background-color); border-radius: 12px; padding: 4px; margin-bottom: 1.5rem;
+        }
+        .tab {
+            flex: 1; padding: 0.75rem; border: none; background: transparent; color: var(--text-secondary);
+            font-size: 1rem; font-weight: 500; cursor: pointer; border-radius: 10px; transition: all 0.2s ease-in-out;
+        }
+        .tab.active {
+            background-color: var(--primary-color); color: var(--surface-color); font-weight: 600; box-shadow: 0 2px 10px rgba(0, 188, 212, 0.3);
+        }
+        .content { display: flex; flex-direction: column; gap: 1rem; }
+        .dropzone {
+            border: 2px dashed var(--border-color); border-radius: 12px; padding: 2rem; text-align: center;
+            cursor: pointer; transition: all 0.2s ease-in-out; color: var(--text-secondary);
+        }
+        .dropzone.active { border-color: var(--primary-color); background-color: rgba(0, 188, 212, 0.05); }
+        .dropzone-text { margin: 0.5rem 0 1rem; font-size: 1rem; }
+        .button-group { display: flex; gap: 1rem; justify-content: center; }
+        .button {
+            padding: 0.5rem 1rem; border: 1px solid var(--border-color); border-radius: 8px;
+            background: var(--surface-color); color: var(--text-primary); cursor: pointer;
+        }
+        .primary-button {
+            padding: 0.9rem; border: none; border-radius: 12px; background: var(--primary-color);
+            color: var(--surface-color); font-size: 1rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s ease;
+        }
+        .primary-button:disabled { background-color: #555; cursor: not-allowed; }
+        .secondary-button {
+            padding: 0.9rem; border: 1px solid var(--border-color); border-radius: 12px; background: transparent;
+            color: var(--primary-color); font-size: 1rem; font-weight: 600; cursor: pointer;
+        }
+        .file-list-container {
+            max-height: 200px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px;
+            padding: 0.5rem; background-color: var(--background-color);
+        }
+        .file-list-header {
+            display: flex; justify-content: space-between; align-items: center; padding: 0.25rem 0.5rem 0.75rem;
+            font-size: 0.8rem; color: var(--text-secondary);
+        }
+        .clear-button {
+            background: none; border: none; color: var(--primary-color); cursor: pointer; font-size: 0.8rem;
+        }
+        .file-list { list-style: none; margin: 0; padding: 0; }
+        .file-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem; border-radius: 6px; }
+        .file-name {
+            flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.9rem;
+        }
+        .file-size { font-size: 0.8rem; color: var(--text-secondary); }
+        .label { font-size: 0.9rem; color: var(--text-secondary); text-align: center; margin: 0 0 0.5rem; }
+        .input {
+            width: calc(100% - 2rem); padding: 0.9rem; border: 1px solid var(--border-color); border-radius: 12px;
+            background: var(--background-color); color: var(--text-primary); font-size: 1rem;
+        }
+        .ticket-box {
+            display: flex; align-items: center; background-color: var(--background-color);
+            border: 1px solid var(--border-color); border-radius: 12px;
+        }
+        .ticket-textarea {
+            flex: 1; border: none; background: transparent; color: var(--text-primary); padding: 0.9rem;
+            font-size: 0.9rem; font-family: monospace; resize: none; min-height: 80px;
+        }
+        .copy-button {
+            padding: 0.75rem; border: none; background: transparent; color: var(--primary-color);
+            cursor: pointer; align-self: flex-start;
+        }
+        .status-text { text-align: center; color: var(--text-secondary); font-size: 0.9rem; }
+        .progress-container {
+            border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem; background-color: var(--background-color);
+        }
+        .progress-header {
+            display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 500;
+        }
+        .progress-bar-outer {
+            height: 8px; width: 100%; background-color: var(--border-color); border-radius: 4px; overflow: hidden;
+        }
+        .progress-bar-inner {
+            height: 100%; background-color: var(--primary-color); border-radius: 4px; transition: width 0.1s linear;
+        }
+        .progress-footer {
+            display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;
+            font-size: 0.8rem; color: var(--text-secondary);
+        }
+        .error-text { color: #FF5252; text-align: center; font-size: 0.9rem; margin: 0; }
+        .instruction-box {
+            border: 1px solid var(--border-color); border-radius: 12px; padding: 0.5rem 1rem 1rem;
+            background-color: var(--background-color);
+        }
+        .broadcast-toggle {
+            display: flex; justify-content: center; align-items: center; gap: 0.75rem;
+            color: var(--text-secondary); margin-bottom: 0.5rem;
+        }
+        .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc; transition: .4s; border-radius: 22px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px;
+            background-color: white; transition: .4s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--primary-color); }
+        input:checked + .slider:before { transform: translateX(18px); }
+
+        .peer-list-container {
+            border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem; background-color: var(--background-color);
+        }
+        .peer-list-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;
+            color: var(--text-primary); font-weight: 600;
+        }
+        #peer-list { list-style: none; padding: 0; margin: 0; max-height: 150px; overflow-y: auto; }
+        .peer-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem; color: var(--text-secondary); }
+        .peer-status { margin-left: auto; font-size: 0.8rem; font-weight: 500; }
+        #modal-backdrop {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7);
+            display: flex; justify-content: center; align-items: center; z-index: 100;
+        }
+        #modal-content {
+            background-color: var(--surface-color); padding: 2rem; border-radius: 16px; width: 90%;
+            max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root">
+        <div class="container">
+            <div class="header">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                <h1 class="title">sndr - Secure File Transfer</h1>
+            </div>
+            <p class="subtitle">Peer-to-peer, zero-knowledge encrypted file sharing.</p>
+            
+            <div class="tabs">
+                <button id="send-tab" class="tab active">Send</button>
+                <button id="receive-tab" class="tab">Receive</button>
+            </div>
+
+            <!-- Error Display -->
+            <p id="error-text" class="error-text"></p>
+
+            <!-- Sender View -->
+            <div id="sender-view" class="content">
+                <!-- Idle State -->
+                <div id="sender-idle-state">
+                    <div class="broadcast-toggle">
+                        <span>Broadcast to many</span>
+                        <label class="switch">
+                            <input type="checkbox" id="broadcast-toggle-cb">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div id="dropzone" class="dropzone">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path><polyline points="16 16 12 12 8 16"></polyline><line x1="12" y1="12" x2="12" y2="22"></line></svg>
+                        <p class="dropzone-text">Drag & drop files or folders here</p>
+                        <div class="button-group">
+                            <button class="button" id="select-files-btn">Select Files</button>
+                            <button class="button" id="select-folder-btn">Select Folder</button>
+                        </div>
+                        <input type="file" multiple id="file-input" class="hidden">
+                        <input type="file" webkitdirectory id="folder-input" class="hidden">
+                    </div>
+                    <div id="file-list-view" class="hidden">
+                        <div class="file-list-container">
+                            <div class="file-list-header">
+                                <span id="file-list-info"></span>
+                                <button id="clear-files-btn" class="clear-button">Clear</button>
+                            </div>
+                            <ul id="file-list" class="file-list"></ul>
+                        </div>
+                        <button id="generate-ticket-btn" class="primary-button" disabled>Generate Secure Ticket</button>
+                    </div>
+                </div>
+
+                <!-- Waiting State -->
+                <div id="sender-waiting-state" class="content hidden">
+                    <div class="instruction-box">
+                        <p><b>1. Send this ticket to the receiver</b></p>
+                        <div class="ticket-box">
+                            <textarea id="sender-offer-ticket" readonly class="ticket-textarea" placeholder="Generating ticket..."></textarea>
+                            <button id="copy-offer-btn" class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
+                        </div>
+                    </div>
+                    <div class="instruction-box">
+                        <p><b>2. Paste receiver's ticket below</b></p>
+                        <textarea id="sender-answer-input" class="ticket-textarea input" placeholder="Paste receiver's ticket here..."></textarea>
+                    </div>
+                    <button id="sender-connect-btn" class="primary-button">Connect</button>
+                    <button class="secondary-button cancel-btn">Cancel</button>
+                </div>
+                
+                <!-- Broadcast State -->
+                <div id="sender-broadcast-state" class="content hidden">
+                    <h3 style="text-align: center; margin: 0 0 0.5rem;">Broadcast Session</h3>
+                    <div class="peer-list-container">
+                        <div class="peer-list-header">
+                            <span id="recipient-count">RECIPIENTS (0)</span>
+                            <button id="add-recipient-btn" class="button">+ Add Recipient</button>
+                        </div>
+                        <ul id="peer-list" class="peer-list"></ul>
+                    </div>
+                    <div class="instruction-box">
+                        <p><b>Paste receiver's ticket to connect</b></p>
+                        <textarea id="broadcast-answer-input" class="ticket-textarea input" placeholder="Paste next available receiver's ticket..."></textarea>
+                        <button id="broadcast-connect-btn" class="button" style="width: 100%; margin-top: 0.5rem;" disabled>Connect Recipient</button>
+                    </div>
+                    <button id="broadcast-send-btn" class="primary-button" disabled>Broadcast to 0 Recipient(s)</button>
+                    <button class="secondary-button cancel-btn">Cancel Broadcast</button>
+                </div>
+
+                <!-- Progress/Complete State (Sender & Receiver) -->
+                <div id="progress-view" class="content hidden">
+                    <div class="progress-container">
+                        <div class="progress-header">
+                            <span id="progress-status-text"></span>
+                            <span id="progress-total-size"></span>
+                        </div>
+                        <div class="progress-bar-outer">
+                            <div id="progress-bar-inner" class="progress-bar-inner" style="width: 0%;"></div>
+                        </div>
+                        <div class="progress-footer">
+                            <span id="progress-percentage">0%</span>
+                        </div>
+                    </div>
+                    <p id="complete-text" class="status-text hidden"></p>
+                    <button id="share-more-btn" class="secondary-button hidden">Share More Files</button>
+                </div>
+            </div>
+
+            <!-- Receiver View -->
+            <div id="receiver-view" class="content hidden">
+                <!-- Idle State -->
+                <div id="receiver-idle-state" class="content">
+                    <p class="label">Paste the sender's secure ticket to connect:</p>
+                    <textarea id="receiver-offer-input" class="ticket-textarea input" placeholder="Paste sender's ticket here..."></textarea>
+                    <button id="receiver-connect-btn" class="primary-button" disabled>Connect</button>
+                </div>
+                
+                <!-- Answering State -->
+                <div id="receiver-answering-state" class="content hidden">
+                    <div class="instruction-box">
+                        <p><b>1. Send this ticket back to the sender</b></p>
+                        <div class="ticket-box">
+                            <textarea id="receiver-answer-ticket" readonly class="ticket-textarea" placeholder="Generating ticket..."></textarea>
+                            <button id="copy-answer-btn" class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
+                        </div>
+                    </div>
+                    <p class="status-text">Waiting for sender to establish connection...</p>
+                    <button class="secondary-button cancel-btn">Cancel</button>
+                </div>
+
+                <!-- Preview State -->
+                <div id="receiver-preview-state" class="content hidden">
+                    <p style="text-align: center; font-weight: 500;">Connected! Waiting for sender to begin transfer...</p>
+                    <div id="receiver-file-list-view" class="file-list-container">
+                        <div class="file-list-header">
+                            <span id="receiver-file-list-info"></span>
+                        </div>
+                        <ul id="receiver-file-list" class="file-list"></ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modal for Broadcast Ticket -->
+            <div id="modal-backdrop" class="hidden">
+                <div id="modal-content">
+                    <h3>Invitation Ticket for Recipient</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary);">Send this ticket to the recipient. Once they send their ticket back, paste it into the main window.</p>
+                    <div class="ticket-box">
+                        <textarea id="modal-ticket-offer" readonly class="ticket-textarea"></textarea>
+                        <button id="modal-copy-btn" class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
+                    </div>
+                    <button id="modal-close-btn" class="button" style="margin-top: 1rem;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="./index.js"></script>
+</body>
+</html>
